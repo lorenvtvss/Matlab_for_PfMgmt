@@ -1,1 +1,3 @@
-# Matlab_for_PfMgmt
+# Matlab for Portfolio Management
+
+Matlab implementation of different portfolio strategies
