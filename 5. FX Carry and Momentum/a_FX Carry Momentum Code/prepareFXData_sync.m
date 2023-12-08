@@ -41,14 +41,13 @@ nDays = length(frontPrices)
 nAssets = size(frontPrices, 2)
 
 
-% Generate numeric dates in the format YYYYMMDD so that we can reuse 
-% the functions we developed previously. To make our life easier we first
-% convert to serial date numbers and then extract year, month, and day.
-% In addition, generate dates for the x-axis of the figures.
-datesNumeric = datenum(mergedTable.Date);
-[yr, mth, dy] = datevec(datesNumeric);
-dates = 10000 * yr + 100 * mth + dy;
-dates4Fig = datetime(mergedTable.Date);
+% Extract dates for the x-axis of the figures and generate numeric dates 
+% in the format YYYYMMDD so that we can reuse the functions we developed previously.
+dates4Fig = mergedTable.Date;       % mergedTable.Date is already datetime
+datesNumeric = datenum(dates4Fig);
+dates = yyyymmdd(dates4Fig);
+% An alternative is to say: [yr, mth, dy] = datevec(datesNumeric); 
+%                           dates = 10000 * yr + 100 * mth + dy;
 
 
 % Rescale the riskless rate to account for the number of calendar days 
@@ -61,7 +60,7 @@ RfScaled(2 : end, 1) = Rf(1 : end - 1, 1) .* dayCount / 360;
 
 
 % Perform the rollover of the futures contracts; test with the next line
-%dailyFutReturns = rolloverFutures(frontPrices(3903 : 3907, :), backPrices(3903 : 3907, :), tickers(3903 : 3907, :));
+%dailyFutReturns = rolloverFutures(frontPrices(3902 : 3906, :), backPrices(3902 : 3906, :), tickers(3902 : 3906, :));
 dailyXsReturns = rolloverFutures(frontPrices, backPrices, tickers);
 dailyTotalReturns = dailyXsReturns + RfScaled * ones(1, nAssets);
 

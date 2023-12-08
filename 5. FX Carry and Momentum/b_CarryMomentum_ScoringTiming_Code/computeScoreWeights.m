@@ -2,8 +2,8 @@ function weights = computeScoreWeights(score)
 
 % Generates portfolios such that all assets with a positive score get
 % a positive weight and those with a negative score get a negative weight.
-% The long and short legs each sum to 100% exposure. Within each leg, the
-% assets are equally weighted.
+% The long and short legs each sum to 100% exposure. 
+% Within each leg, the assets are equally weighted.
 
 nAssets = length(score);
 

@@ -1,15 +1,17 @@
 function [cumTR, cumXsR, cumRf] = aggregateFutXsReturns(originalReturns, Rf, dateList, nDigits)
 
-% Aggregates daily futures returns over time, accounting for MTM. The
-% function returns cumulative total returns, cumulative excess returns, and
+% Aggregates daily futures returns over time, accounting for MTM. 
+% The function returns cumulative total returns, cumulative excess returns, and
 % the cumulative return on the riskless asset.
 % The original set of returns should be futures (i.e. excess) returns.
 % Rf denotes the riskless rate for the futures' base currency.
 % Dates should be provided as numeric in the format YYYYMMDD, YYMMDD, or
-% MMDD. The desired aggregation level is defined by the number of digits  
-% that are removed from the date list. 2 digits will aggregate daily returns 
-% to monthly ones or monthly returns to annual ones. 4 digits will convert 
-% daily returns to annual returns.
+% MMDD. 
+% The desired aggregation level is defined by the number of digits  
+% that are removed from the date list. 
+%   nDigits = 2: will aggregate daily returns to monthly ones 
+%                or monthly returns to annual ones
+%   nDigits = 4: will convert daily returns to annual returns
 
 % Get the first and last day of each period
 [firstDayList, lastDayList] = getFirstAndLastDayInPeriod(dateList, nDigits);

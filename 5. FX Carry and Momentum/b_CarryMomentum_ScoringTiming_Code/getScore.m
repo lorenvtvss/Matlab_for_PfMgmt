@@ -3,8 +3,9 @@ function scores = getScore(sortVariable, nLongs, nShorts, longHighValues)
 % Generates scores of +1 or -1 based on sortVariable. 
 % The function ignores assets for which the sort variable is missing (NaN).
 % nLongs and nShorts denote the number of assets that will get positive and
-% negative scores, respectively. When longHighValues is 1, assets that have 
-% the highest values for sortVariable are given a positive score and those 
+% negative scores, respectively. 
+% When longHighValues is 1, assets that have the highest values for 
+% sortVariable are given a positive score and those 
 % with the lowest values a negative score. Otherwise the opposite holds.
 
 

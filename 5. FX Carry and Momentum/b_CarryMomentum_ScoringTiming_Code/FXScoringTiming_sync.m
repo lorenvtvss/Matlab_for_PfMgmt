@@ -12,7 +12,7 @@ annualizationFactor = 12;
 % Trading lag. 0 means same-day trading, 1 means one day between
 % computations and trading
 lag = 0;
-% Number of currencies held long and short
+% Number of currencies that will get a positive and negative score
 nLongs = 3;
 nShorts = 3;
 % Setting to compute monthly futures excess returns
@@ -26,23 +26,30 @@ avgVIX = 20;
 % Load the data, compute the returns on the futures contracts, and plot 
 % the returns on the different currencies (steps 1 - 7 from the currency
 % carry/momentum example).
-prepareFXData;
+prepareFXData_sync;
 
 
-% Load the VIX data and drop the header row from the dates
-[VIXPrices, VIXDates] = xlsread('VIX.xls');
-VIXDates = VIXDates(2 : end, 1);
+% Load the VIX data and convert the table to timetable so we can synchronize
+VIXTable = readtable('VIX.xls');
+% In case the dates are loaded as strings, you would convert them to dates
+% using the following:
+% VIXTable.Date = datetime(VIXTable.Date, 'InputFormat', 'MM/dd/yyyy');
+VIXTable = table2timetable(VIXTable);
+
+% Synchronize with the currency data and fill the NaNs
+mergedTableWithVIX = synchronize(mergedTable, VIXTable, 'first');
+mergedTableWithVIX = fillmissing(mergedTableWithVIX, 'previous');
+VIXPrices = mergedTableWithVIX.VIXIndex;
+
 
 % Generate a numeric date for VIX data. We need to do this because the 
 % market holidays are not the same for equity options and currency futures.
-datesNumericVIX = datenum(VIXDates, 'mm/dd/yyyy');
-[yrVIX, mthVIX, dyVIX] = datevec(datesNumericVIX);
-datesVIX = 10000 * yrVIX + 100 * mthVIX + dyVIX;
+datesVIX = yyyymmdd(VIXTable.Date);
 
 % Use interest rates and past returns to give an overall score to currencies
 % and construct the portfolio based on the overall score.
 % First, generate arrays listing the first and last trading day of each month
-% We need two arrays, one for currencies, one for VIX.
+% We need an array for VIX to make sure we have the same number of months.
 [firstDayList, lastDayList] = getFirstAndLastDayInPeriod(dates, 2);
 [firstDayListVIX, lastDayListVIX] = getFirstAndLastDayInPeriod(datesVIX, 2);
 nMonths = length(firstDayList)
@@ -65,12 +72,12 @@ scale = zeros(nMonths, 1);
 % past returns. Then compute the overall score and equal weight assets with
 % a positive total score and those with a negative total score.
 for m = 1 : nMonths
-    first = firstDayList(m);
-    last = lastDayList(m);
-    monthlyRet = prod(1 + dailyXsReturns(max(first - lag, 1) : last - lag, :));
+    first = max(firstDayList(m) - lag, 1);
+    last = lastDayList(m) - lag;
+    monthlyRet = prod(1 + dailyXsReturns(first : last, :));
     
     % Compute carry and momentum scores
-    carryScore(m, :) = getScore(intRates(last - lag, :), nLongs, nShorts, 1);
+    carryScore(m, :) = getScore(intRates(last, :), nLongs, nShorts, 1);
     momScore(m, :) = getScore(monthlyRet, nLongs, nShorts, 1);
     
     % Compute total score and form the portfolio
@@ -78,8 +85,7 @@ for m = 1 : nMonths
     pfWeightsRaw(m, :) = computeScoreWeights(totalScore(m, :));
 
     % Timing component
-    lastVIX = lastDayListVIX(m) - lag;
-    scale(m) = avgVIX / VIXPrices(lastVIX);
+    scale(m) = avgVIX / VIXPrices(last);
     equalWeightsTimed(m, :) = scale(m) * equalWeightsRaw(m, :);
     pfWeightsTimed(m, :) = scale(m) * pfWeightsRaw(m, :);
 end
@@ -115,4 +121,5 @@ monthlyStrategyNAV = cumprod(1 + allTotalReturns);
 figure
 semilogy(dates4FigMonthly, monthlyStrategyNAV(:, 1), 'k-', dates4FigMonthly, monthlyStrategyNAV(:, 2), 'b--', dates4FigMonthly, monthlyStrategyNAV(:, 3), 'r:', dates4FigMonthly, monthlyStrategyNAV(:, 4), 'm-.')
     xlabel('Year'), ylabel('Portfolio Value'), 
-    legend('EW Constant Exposure', 'EW Timed', 'Scoring Constant Exposure', 'Scoring Timed', 'Location', 'SouthEast')set(gcf, 'Position', [200, 200, 800, 600])
+    legend('EW Constant Exposure', 'EW Timed', 'Scoring Constant Exposure', 'Scoring Timed', 'Location', 'SouthEast')
+set(gcf, 'Position', [200, 200, 800, 600])

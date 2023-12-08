@@ -4,15 +4,12 @@ function summarizePerformance(xsReturns, Rf, factorXsReturns, annualizationFacto
 % and kurtosis are reported for excess returns.
 % 
 % The returns provided in xsReturns should be excess returns, one column  
-%   per asset or strategy, one row per period. 
-% The column vector Rf should contain the return on the riskless asset 
-%   during each period. 
-% The factor excess returns are used to compute factor exposures and alphas. 
-% The annualization factor is used for the average return, standard deviation, 
-%   Sharpe ratio, and alpha. 
-%   annualizationFactor = 12: for monthly data 
-%   annualizationFactor = 252 for daily data. 
-% The text is used for labeling. 
+% per asset or strategy, one row per period. The column vector Rf should  
+% contain the return on the riskless asset during each period. The factor 
+% excess returns are used to compute factor exposures and alphas. The   
+% annualization factor is used for the average return, standard deviation, 
+% Sharpe ratio, and alpha. It should be 12 for monthly data and 252 for  
+% daily data. The text is used for labeling. 
 
 % Compute total returns
 nAssets = size(xsReturns, 2);
